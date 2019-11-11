@@ -1,0 +1,449 @@
+{
+  "terraform_engine": "~> 0.11.0",
+  "input_datatypes": [
+    {
+      "name": "bastionhost",
+      "label": "Bastion Data"
+    }
+  ],    
+  "output_datatypes": [
+    {
+      "name": "com.ibm.cloud.cloudconnections.ICP",
+      "dataobject": {
+        "name": "${template_input_params.icp_cluster_name}",
+        "attributes": [
+          {
+            "name": "username",
+            "value": "${template_input_params.icp_admin_user}"
+          },
+          {
+            "name": "password",
+            "value": "${template_input_params.icp_admin_password}"
+          }
+        ]
+      }
+    },
+		{
+			"name": "private_docker_registry",
+			"dataobject": {
+				"name": "${template_output_params.registry_config_do_name}",
+				"attributes": [
+					{
+						"name": "server_name",
+						"value": "${template_output_params.ibm_cloud_private_custer_ca_domain}"
+					}, {
+						"name": "server_ip",
+						"value": "${template_output_params.icp_master_ip}"
+					}, {
+						"name": "server_port",
+						"value": "5000"
+					}, {
+						"name": "CA_certificate",
+						"value": "${template_output_params.registry_ca_cert}"
+					}
+				]
+			}
+		}
+  ],
+  "input_groups": [
+    {
+      "name": "bastion",
+      "label": "Bastion host variables"
+    },
+    {
+      "name": "openshift_installer_node_info",
+      "label": "OpenShift Installer Node Information"
+    },
+    {
+      "name": "icpdownload",
+      "label": "IBM Cloud Private Download Settings"
+    },
+    {
+      "name": "icpsetting",
+      "label": "IBM Cloud Private Settings"
+    },
+    {
+      "name": "icpsshkey",
+      "label": "IBM Cloud Private SSH Keys Settings"
+    }
+	],
+  "template_input_params": [
+    {
+      "name": "bastion_host",
+      "type": "string",
+      "group_name": "bastion",
+      "hidden": true,
+      "description": "Bastion host for ssh proxy",
+      "default": "${bastionhost.bastion_host}",
+      "label": "Bastion host",
+      "secured": false,
+      "required": false
+    },
+    {
+      "name": "bastion_port",
+      "type": "string",
+      "group_name": "bastion",
+      "hidden": true,
+      "description": "Bastion port for ssh proxy",
+      "default": "${bastionhost.bastion_port}",
+      "label": "Bastion port",
+      "secured": false,
+      "required": false
+    },
+    {
+      "name": "bastion_user",
+      "type": "string",
+      "group_name": "bastion",
+      "hidden": true,
+      "description": "Bastion user for ssh proxy",
+      "default": "${bastionhost.bastion_user}",
+      "label": "Bastion user",
+      "secured": false,
+      "required": false
+    },
+    {
+      "name": "bastion_private_key",
+      "type": "string",
+      "group_name": "bastion",
+      "hidden": true,
+      "description": "Bastion private key for ssh proxy",
+      "default": "${bastionhost.bastion_private_key}",
+      "label": "Bastion private key",
+      "secured": true,
+      "required": false
+    },  
+    {
+      "name": "bastion_password",
+      "type": "string",
+      "group_name": "bastion",
+      "hidden": true,
+      "description": "Bastion user password for ssh proxy",
+      "default": "${bastionhost.bastion_password}",
+      "label": "Bastion user password",
+      "secured": true,
+      "required": false
+    },
+    {
+      "name": "bastion_host_key",
+      "type": "string",
+      "group_name": "bastion",
+      "hidden": true,
+      "description": "Bastion host public key for ssh proxy",
+      "default": "${bastionhost.bastion_host_key}",
+      "label": "Bastion host key",
+      "secured": false,
+      "required": false
+    },
+    {
+      "name": "download_user",
+      "description": "Username to access a secure repository location",
+      "type": "string",
+      "required": false,
+      "secured": false,
+      "label": "Binary Repository User Name (Optional)",
+      "hidden": false,
+      "immutable": false,
+      "group_name": "icpdownload"
+    },
+    {
+      "name": "download_user_password",
+      "description": "Password for the Username to access a secure repository location",
+      "type": "password",
+      "required": false,
+      "secured": true,
+      "label": "Binary Repository User Password (Optional)",
+      "hidden": false,
+      "immutable": false,
+      "group_name": "icpdownload"
+    },
+    {
+      "name": "icp_binary_url",
+      "description": "Location of the IBM Cloud Private Binaries used by IBM Cloud Private",
+      "type": "string",
+      "required": true,
+      "secured": false,
+      "label": "IBM Cloud Private Download Location (http|https|ftp|file)",
+      "hidden": false,
+      "immutable": false,
+      "group_name": "icpdownload",
+      "regex": "(https?|ftp|file)://[-A-Za-z0-9\\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\\+&@#/%=~_|]",
+      "regexdesc": "http|https|ftp|file Location to download the IBM Cloud Private Binaries"
+    },
+    {
+      "name": "icp_cluster_name",
+      "description": "IBM Cloud Private Cluster Name",
+      "type": "string",
+      "required": true,
+      "secured": false,
+      "label": "IBM Cloud Private Cluster Name",
+      "hidden": false,
+      "immutable": false,
+      "group_name": "icpsetting",
+      "regex": "^[a-z0-9.-]{1,80}$"
+    },
+    {
+      "name": "icp_admin_user",
+      "description": "IBM Cloud Private Admin User Name",
+      "default": "admin",
+      "type": "string",
+      "required": true,
+      "secured": false,
+      "label": "IBM Cloud Private Admin Username",
+      "hidden": false,
+      "immutable": false,
+      "group_name": "icpsetting"
+    },
+    {
+      "name": "icp_admin_password",
+      "description": "IBM Cloud Private Admin User Password",
+      "type": "password",
+      "required": true,
+      "secured": true,
+      "label": "IBM Cloud Private Admin Password",
+      "hidden": false,
+      "immutable": false,
+      "regex": "^([a-zA-Z0-9\\-]{32,})$",
+      "regexdesc": "Allow alphanumeric characters or - symbol. Must have at least 32 characters",
+      "group_name": "icpsetting"
+    },
+    {
+      "name": "icp_management_host",
+      "description": "Management Node Hostname, needs to be one of the OCP nodes",
+      "type": "string",
+      "required": true,
+      "secured": false,
+      "label": "Management Node Hostname (one of the OCP nodes)",
+      "hidden": false,
+      "immutable": false,
+      "group_name": "icpsetting"
+    },
+    {
+      "name": "icp_master_host_ip",
+      "description": "Master Node Hostname and IP Address, needs to be one of the OCP nodes",
+      "type": "map",
+      "required": true,
+      "secured": false,
+      "label": "Master Node Hostname and IP Address (one of the OCP nodes)",
+      "hidden": false,
+      "immutable": false,
+      "group_name": "icpsetting"
+    },
+    {
+      "name": "icp_proxy_host",
+      "description": "Proxy Node Hostname, needs to be one of the OCP nodes",
+      "type": "string",
+      "required": true,
+      "secured": false,
+      "label": "Proxy Node Hostname (one of the OCP nodes)",
+      "hidden": false,
+      "immutable": false,
+      "group_name": "icpsetting"
+    },
+    {
+      "name": "icp_private_ssh_key",
+      "description": "IBM Cloud Private - Private SSH key for access between boxes (base64 encoded)",
+      "default": "",
+      "type": "string",
+      "required": false,
+      "secured": true,
+      "label": "IBM Cloud Private - Private SSH Key",
+      "hidden": false,
+      "immutable": false,
+      "group_name": "icpsshkey"
+    },
+    {
+      "name": "icp_public_ssh_key",
+      "description": "IBM Cloud Private - Public SSH key for access between boxes",
+      "default": "",
+      "type": "string",
+      "required": false,
+      "secured": false,
+      "label": "IBM Cloud Private - Public SSH Key",
+      "hidden": false,
+      "immutable": false,
+      "group_name": "icpsshkey"
+    },
+    {
+      "name": "icp_version",
+      "description": "IBM Cloud Private Version Number",
+      "default": "3.2.0",
+      "type": "string",
+      "required": true,
+      "secured": false,
+      "label": "IBM Cloud Private Version",
+      "hidden": true,
+      "immutable": false,
+      "group_name": "icpdownload"
+    },
+    {
+      "name": "ocp_master_host_ip",
+      "description": "OCP Installer Node Hostname and IP Address",
+      "type": "map",
+      "required": true,
+      "secured": false,
+      "label": "OCP Installer Node Hostname and IP Address",
+      "hidden": false,
+      "immutable": false,
+      "group_name": "openshift_installer_node_info"
+    },
+    {
+      "name": "ocp_infra_ip",
+      "description": "OCP Infrastructure Node IP Address",
+      "type": "string",
+      "required": true,
+      "secured": false,
+      "label": "OCP Infrastructure Node IP Address",
+      "hidden": false,
+      "immutable": false,
+      "group_name": "openshift_installer_node_info"
+    },
+    {
+      "name": "ocp_vm_domain_name",
+      "description": "OCP Virtual machine domain name",
+      "type": "string",
+      "required": true,
+      "secured": false,
+      "label": "OCP Virtual machine domain name",
+      "hidden": false,
+      "immutable": false,
+      "group_name": "openshift_installer_node_info"
+    },
+    {
+      "name": "installer_vm_os_user",
+      "default": "root",
+      "description": "The user name to connect to the OCP virtual machine.",
+      "type": "string",
+      "required": true,
+      "secured": false,
+      "label": "OCP Virtual Machine User Name",
+      "hidden": false,
+      "immutable": false,
+      "group_name": "openshift_installer_node_info"
+    },
+    {
+      "name": "installer_vm_os_password",
+      "description": "The user password to connect to the OCP virtual machine.",
+      "type": "string",
+      "required": true,
+      "secured": true,
+      "label": "OCP Virtual Machine User Password",
+      "hidden": false,
+      "immutable": false,
+      "group_name": "openshift_installer_node_info"
+    },
+    {
+      "name": "ocp_enable_glusterfs",
+      "description": "Indicates whether GlusterFS storage has been enabled during OCP installation",
+      "options": [
+        {
+          "value": "true",
+          "label": "true"
+        },
+        {
+          "value": "false",
+          "label": "false",
+          "default": true
+        }
+      ],
+      "type": "string",
+      "required": true,
+      "secured": false,
+      "label": "Enabled GlusterFS",
+      "hidden": false,
+      "immutable": false,
+      "group_name": "openshift_installer_node_info"
+    }
+  ],
+  "template_output_params": [
+    {
+      "name": "ibm_cloud_private_admin_user",
+      "description": "IBM Cloud Private Admin Username",
+      "type": "string",
+      "required": true,
+      "secured": false,
+      "label": "IBM Cloud Private Admin Username",
+      "hidden": false,
+      "immutable": false,
+      "group_name": "content_template_output"
+    },
+    {
+      "name": "ibm_cloud_private_admin_password",
+      "description": "IBM Cloud Private Admin Username Password",
+      "type": "string",
+      "required": true,
+      "secured": true,
+      "label": "IBM Cloud Private Admin Password",
+      "hidden": false,
+      "immutable": false,
+      "group_name": "content_template_output"
+    },
+    {
+      "name": "ibm_cloud_private_admin_url",
+      "type": "url",
+      "description": "IBM Cloud Private Cluster URL.",
+      "hidden": false,
+      "label": "IBM Cloud Private Cluster URL",
+      "shortname": "IBM Cloud Private Console",
+      "group_name": "content_template_output",
+      "secured": false,
+      "system": false,
+      "required": true,
+      "immutable": false
+    },
+    {
+      "name": "ibm_cloud_private_boot_ip",
+      "description": "IBM Cloud Private Boot IP Address",
+      "type": "string",
+      "required": true,
+      "secured": false,
+      "label": "IBM Cloud Private Boot IP Address",
+      "hidden": false,
+      "immutable": false
+    },
+    {
+			"name": "registry_config_do_name",
+			"type": "string",
+			"description": "Name of docker private registry data object that contains docker registry details for this deployment.",
+			"hidden": false,
+			"label": "Docker Private Registry Data Object Name",
+			"secured": false
+    },
+    {
+			"name": "icp_install_dir",
+			"type": "string",
+			"description": "ICP Install Directory",
+			"hidden": false,
+			"label": "ICP Install Directory",
+			"secured": false
+    },
+    {
+			"name": "ibm_cloud_private_custer_ca_domain",
+			"type": "string",
+			"description": "IBM Cloud Private Cluster CA Domain. This value is used as registry server name.",
+			"hidden": false,
+			"label": "IBM Cloud Private Cluster CA Domain",
+			"secured": false,
+			"system": false,
+			"required": true,
+			"immutable": false
+    },
+    {
+			"name": "registry_ca_cert",
+			"type": "string",
+			"description": "Base64 encoded private docker registry CA certificate. If CA certificate is emmpty then this value will be base64 encoded value of string NIL",
+			"hidden": false,
+			"label": "Base64 encoded private docker registry CA certificate",
+			"secured": false
+    },
+    {
+      "name": "icp_master_ip",
+      "description": "IBM Cloud Private Master IP Address",
+      "type": "string",
+      "required": true,
+      "secured": false,
+      "label": "IBM Cloud Private Master IP Address",
+      "hidden": false,
+      "immutable": false
+    }
+  ]
+}
